@@ -20,16 +20,27 @@ export async function createAirdrop(req, res) {
       return res.status(400).json({ message: "Invalid or missing _id" });
     }
 
-    const objectId = new ObjectId(_id); // Tidak menggunakan 'new'
+    const objectId = new ObjectId(_id);
 
     // Cari user berdasarkan ObjectId tertentu
     const user = await collection.findOne({ _id: objectId });
 
     if (user) {
-      // Tambahkan catatan ke user yang ditemukan
+      // Membuat ID khusus untuk airdrop
+      const airdropId = new ObjectId();
+
+      // Tambahkan catatan ke user yang ditemukan, dengan ID baru untuk airdrop
       const result = await collection.updateOne(
         { _id: objectId },
-        { $set: { name, timer } }
+        {
+          $push: {
+            additionalAirdrop: {
+              airdropId, // ID baru untuk airdrop
+              name,
+              timer,
+            },
+          },
+        }
       );
 
       res.status(201).json(result);
